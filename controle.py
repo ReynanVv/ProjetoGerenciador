@@ -2,22 +2,23 @@ import mysql.connector
 from PyQt5 import uic, QtWidgets
 from reportlab.pdfgen import canvas
 
-numero_id = 0
+numero_id = 0  # variavel global
 
-banco = mysql.connector.connect(
+banco = mysql.connector.connect( # conecetar ao banco de dados local
     host="localhost",
     user="root",
     passwd="",
     database="cadastro_pibex"
 )
 
-def gerar_pdf():
+
+def gerar_pdf():  # função para gerar um pdf formatado (incompleto)
     try:
         cursor = banco.cursor()
         comando_SQL = "SELECT * FROM cadastro"
         cursor.execute(comando_SQL)
         dados_lidos = cursor.fetchall()
-        #print(dados_lidos)
+        # print(dados_lidos)
         y = 0
         pdf = canvas.Canvas("cadastro_pibex.pdf")
         pdf.setFont("Times-Bold", 6)
@@ -54,15 +55,15 @@ def gerar_pdf():
             pdf.drawString(666, 750 - y, str(dados_lidos[i][11]))
             pdf.drawString(726, 750 - y, str(dados_lidos[i][12]))
 
-
             pdf.save()
             print("PDF FOI GERADO COM SUCESSO!")
 
     except:
         print("não foi possivel criar o pdf")
 
-# pegando os valores de cadastro
-def funcao_principal():
+
+def funcao_principal():  # pegando os valores de cadastro
+
     try:
         linha1 = formulario.lineEdit.text()
         linha2 = formulario.lineEdit_2.text()
@@ -91,10 +92,10 @@ def funcao_principal():
         linha25 = formulario.lineEdit_25.text()
         linha26 = formulario.lineEdit_26.text()
 
-
-        print("Dados", linha1, linha2, linha3, linha4, linha5, linha6, linha7, linha8, linha9, linha10, linha11, linha12,
-              linha13, linha14, linha15, linha16, linha17, linha18,linha19,linha21,linha22,linha23,linha24,linha25,linha26)
-
+        print("Dados", linha1, linha2, linha3, linha4, linha5, linha6, linha7, linha8, linha9, linha10, linha11,
+              linha12,
+              linha13, linha14, linha15, linha16, linha17, linha18, linha19, linha21, linha22, linha23, linha24,
+              linha25, linha26)
 
         cursor = banco.cursor()
         comando_SQL = "INSERT INTO cadastro (PROCESSO_DE_INDICACAO,DATA_DE_VINCULO,SITUACAO_DO_BOLSISTA," \
@@ -104,9 +105,12 @@ def funcao_principal():
                       "CONTA_CORRENTE,VALOR,EDITAL,TIPO_DE_BOLSA) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s," \
                       "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
         dados = (
-        str(linha1), str(linha2), str(linha3), str(linha4), str(linha5), str(linha6), str(linha7), str(linha8), str(linha9),
-        str(linha10), str(linha11), str(linha12), str(linha13), str(linha14), str(linha15), str(linha16), str(linha17),
-        str(linha18),str(linha19),str(linha20),str(linha21),str(linha22),str(linha23),str(linha24),str(linha25),str(linha26))
+            str(linha1), str(linha2), str(linha3), str(linha4), str(linha5), str(linha6), str(linha7), str(linha8),
+            str(linha9),
+            str(linha10), str(linha11), str(linha12), str(linha13), str(linha14), str(linha15), str(linha16),
+            str(linha17),
+            str(linha18), str(linha19), str(linha20), str(linha21), str(linha22), str(linha23), str(linha24),
+            str(linha25), str(linha26))
         cursor.execute(comando_SQL, dados)
         banco.commit()
         formulario.lineEdit.setText("")
@@ -140,7 +144,8 @@ def funcao_principal():
     finally:
         cursor.close()
 
-def chama_listagem():
+
+def chama_listagem():  # pega a lista de cadastros no banco de dados e mostra em uma tabela
     listar_tela.show()
 
     cursor = banco.cursor()
@@ -155,18 +160,19 @@ def chama_listagem():
         for j in range(0, 27):
             listar_tela.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos[i][j])))
 
-def excluir_dados():
+
+def excluir_dados():  # exclui cadastros da lista
     linha = listar_tela.tableWidget.currentRow()
     listar_tela.tableWidget.removeRow(linha)
-
 
     cursor = banco.cursor()
     cursor.execute("SELECT id FROM cadastro")
     dados_lidos = cursor.fetchall()
     valor_id = dados_lidos[linha][0]
-    cursor.execute("DELETE FROM cadastro WHERE id="+ str(valor_id))
+    cursor.execute("DELETE FROM cadastro WHERE id=" + str(valor_id))
 
-def editar_dados():
+
+def editar_dados():  # edita informações de cadastro
     global numero_id
 
     linha = listar_tela.tableWidget.currentRow()
@@ -208,10 +214,11 @@ def editar_dados():
     tela_editar.lineEdit_25.setText(str(dados[0][25]))
     tela_editar.lineEdit_26.setText(str(dados[0][26]))
 
+
 def salvar_dados_editados():
-    #numero do id
+    # numero do id
     global numero_id
-    #valor digitado no lineEdit
+    # valor digitado no lineEdit
     linha1 = tela_editar.lineEdit.text()
     linha2 = tela_editar.lineEdit_2.text()
     linha3 = tela_editar.lineEdit_3.text()
@@ -238,7 +245,7 @@ def salvar_dados_editados():
     linha24 = tela_editar.lineEdit_24.text()
     linha25 = tela_editar.lineEdit_25.text()
     linha26 = tela_editar.lineEdit_26.text()
-    #atualizar os dados no banco
+    # atualizar os dados no banco
     cursor = banco.cursor()
     cursor.execute("UPDATE cadastro SET PROCESSO_DE_INDICACAO = '{}', DATA_DE_VINCULO = '{}', SITUACAO_DO_BOLSISTA = "
                    "'{}', PROCESSO_DE_DESLIGAMENTO = '{}', DATA_DE_DESLIGAMENTO = '{}', "
@@ -246,35 +253,67 @@ def salvar_dados_editados():
                    "DATA_FIM = '{}', PROJETO = '{}', CODIGO = '{}',LOTACAO = '{}', E_MAIL_DO_A_ORIENTADOR_A = '{}', "
                    "E_MAIL_DO_A_BOLSISTA = '{}', ORIENTADOR_A = '{}', BOLSISTA = '{}', MATRICULA = '{}', CPF = '{}', "
                    "BANCO = '{}', CODIGO_DO_BANCO = '{}', AGENCIA = '{}', OP = '{}', CONTA_CORRENTE = '{}', "
-                   "VALOR = '{}', EDITAL = '{}', TIPO_DE_BOLSA = '{}' WHERE id = {}".format(linha1,linha2,linha3,
-                                                                                            linha4,linha5,linha6,
-                                                                                            linha7,linha8,
-                                                                                            linha9,linha10,linha11,
-                                                                                            linha12,linha13,linha14,
-                                                                                            linha15,linha16,linha17,
-                                                                                            linha18,linha19,linha20,
-                                                                                            linha21,linha22,linha23,
-                                                                                            linha24,linha25,linha26,
+                   "VALOR = '{}', EDITAL = '{}', TIPO_DE_BOLSA = '{}' WHERE id = {}".format(linha1, linha2, linha3,
+                                                                                            linha4, linha5, linha6,
+                                                                                            linha7, linha8,
+                                                                                            linha9, linha10, linha11,
+                                                                                            linha12, linha13, linha14,
+                                                                                            linha15, linha16, linha17,
+                                                                                            linha18, linha19, linha20,
+                                                                                            linha21, linha22, linha23,
+                                                                                            linha24, linha25, linha26,
                                                                                             numero_id))
     banco.commit()
-    #atualizar as janelas
+    # atualizar as janelas
     tela_editar.close()
     listar_tela.close()
     chama_listagem()
 
 
-app = QtWidgets.QApplication([])
+def regist_freque():  # registrar as frequencias enviadas
+    global numero_id
+
+    linha = listar_tela.tableWidget.currentRow()
+
+    cursor = banco.cursor()
+    cursor.execute("SELECT id FROM cadastro")
+    dados_lidos = cursor.fetchall()
+    valor_id = dados_lidos[linha][0]
+    cursor.execute("SELECT * FROM cadastro WHERE id=" + str(valor_id))
+    dados = cursor.fetchall()
+
+    tela_frequencia.show()
+
+    numero_id = valor_id
+
+    tela_frequencia.lineEdit.setText(str(dados[0][16]))
+    tela_frequencia.lineEdit_2.setText(str(dados[0][17]))
+
+
+def mostrar_valor():  # função teste que ira cadastras frequencias em cada mês
+    valor = tela_frequencia.valor_mes.currentText()
+    if valor == "JAN":
+        print("mes janeiro")
+    elif valor == "FEV":
+        print("mes fevereiro")
+    elif valor == "MAR":
+        print("mes março")
+
+# carregando os aqruivos de interface
+app = QtWidgets.QApplication([]) 
 formulario = uic.loadUi("formulario.ui")
 listar_tela = uic.loadUi("listagem.ui")
 tela_editar = uic.loadUi("menuEditar.ui")
+tela_frequencia = uic.loadUi("frequencia.ui")
+
 formulario.pushButton.clicked.connect(funcao_principal)
 formulario.pushButton_2.clicked.connect(chama_listagem)
 listar_tela.pushButton.clicked.connect(gerar_pdf)
 listar_tela.pushButton_2.clicked.connect(excluir_dados)
 listar_tela.pushButton_3.clicked.connect(editar_dados)
+listar_tela.pushButton_4.clicked.connect(regist_freque)
 tela_editar.pushButton.clicked.connect(salvar_dados_editados)
+tela_frequencia.pushButton.clicked.connect(mostrar_valor)
 
 formulario.show()
 app.exec()
-
-
